@@ -23,7 +23,6 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   res.cookie("token", token, {
     httpOnly: true,
-    sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
@@ -57,7 +56,6 @@ exports.login = catchAsync(async (req, res, next) => {
 
   res.cookie("token", token, {
     httpOnly: true,
-    sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -75,7 +73,6 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.logout = catchAsync(async (req, res, next) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
   });
 
@@ -158,37 +155,10 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   const token = await jwtTokenGenerator(user._id);
   res.cookie("token", token, {
     httpOnly: true,
-    sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   // send res
-  res.status(200).json({
-    status: "success",
-    message: "Password reset successful",
-    token,
-    user,
-  });
-});
-
-exports.updatePassword = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).select("+password");
-
-  if (!(await user.comparePassword(req.body.currentPassword, user.password))) {
-    return next(new AppError("Your current password is wrong.", 401));
-  }
-
-  user.password = req.body.password;
-  user.confirmPassword = req.body.confirmPassword;
-  await user.save();
-
-   const token = await jwtTokenGenerator(user._id);
-  res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-
   res.status(200).json({
     status: "success",
     message: "Password reset successful",

@@ -7,15 +7,20 @@ const authMiddleware = require("../middleware/authMiddleware");
 // public routes
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
+router.post("/logout", authController.logout);
 router.post("/forgetPassword", authController.forgetPassword);
 router.patch("/resetPassword/:token", authController.resetPassword);
-router.patch(
-  "/updatePassword",
-  authMiddleware.protect,
-  authController.updatePassword
-);
 
-// protect route
+// protected routes
+router.patch(
+  "/updateMyPassword",
+  authMiddleware.protect,
+  usersController.updateMyPassword
+);
+router.patch("/updateMe", authMiddleware.protect, usersController.updateMe);
+router.delete("/deleteMe", authMiddleware.protect, usersController.deleteMe);
+
+// admin routes
 router.get(
   "/",
   authMiddleware.protect,
@@ -25,8 +30,16 @@ router.get(
 
 router
   .route("/:id")
-  .get(usersController.getUser)
-  .patch(usersController.updateUser)
+  .get(
+    authMiddleware.protect,
+    authMiddleware.restrictTo("admin"),
+    usersController.getUser
+  )
+  .patch(
+    authMiddleware.protect,
+    authMiddleware.restrictTo("admin"),
+    usersController.updateUser
+  )
   .delete(
     authMiddleware.protect,
     authMiddleware.restrictTo("admin"),
