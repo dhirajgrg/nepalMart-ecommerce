@@ -34,34 +34,11 @@ exports.restrictTo = (...roles) => {
     if (!roles.includes(req.user.role)) {
       return next(
         new AppError(
-          "denied this operation!! only admin can perform this action",
+          "denied this operation!! only admin or vendor can perform this action",
           403
         )
       );
     }
     next();
   };
-};
-
-exports.allowSelfOrAdmin = async (req, res, next) => {
-  try {
-    const loggedInUser = req.user;
-    const targetUserId = req.params.id;
-
-    if (
-      loggedInUser.role === "admin" ||
-      loggedInUser._id.toString() === targetUserId.toString()
-    )
-      return next();
-
-    return res.status(403).json({
-      message:
-        "Forbidden: Only admins or the account owner can perform this action.",
-    });
-  } catch (error) {
-    console.log("Authorization error:", error);
-    res
-      .status(500)
-      .json({ message: "Server error in allowSelfOrAdmin middleware." });
-  }
 };

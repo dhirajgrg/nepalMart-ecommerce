@@ -2,16 +2,8 @@ const User = require("../models/usersModels");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 
-//self-user controller
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-  res.status(200).json({
-    status: "success",
-    message: "All users fetch successfully",
-    usersLength: users.length,
-    data: users,
-  });
-});
+
+// user controller
 
 exports.updateMyPassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select("+password");
@@ -74,6 +66,17 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     status: "success",
     message: "User deleted successfully",
     data: null,
+  });
+});
+
+exports.getMe = catchAsync(async (req, res, next) => {
+  const user = req.user;
+  if (!user) return new AppError("user not fount or logged in", 401);
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
   });
 });
 
