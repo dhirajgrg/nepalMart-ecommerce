@@ -2,19 +2,23 @@ const AppError = require("../utils/appError");
 const Product = require("../models/productsModels");
 const catchAsync = require("../utils/catchAsync");
 
+// Get All Products
 exports.getAllProducts = catchAsync(async (req, res, next) => {
   const products = await Product.find().populate("vendor", "name email");
-  if (!products || products.length === 0)
-    return new AppError("no products found", 404);
+  if (!products || products.length === 0) {
+    return next(new AppError("No products found", 404));
+  }
+  
   res.status(200).json({
     status: "success",
-    message: "users fetch successfully",
+    message: "Products fetched successfully",
     data: {
       products,
     },
   });
 });
 
+// Approve Product
 exports.approvedProducts = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const product = await Product.findByIdAndUpdate(
@@ -25,13 +29,18 @@ exports.approvedProducts = catchAsync(async (req, res, next) => {
       runValidators: true,
     }
   );
-  if (!product) return res.status(404).json({ message: "Product not found" });
+  
+  if (!product) {
+    return next(new AppError("Product not found", 404));
+  }
 
-  res
-    .status(200)
-    .json({ status: "success", message: "product approved successfully" });
+  res.status(200).json({
+    status: "success",
+    message: "Product approved successfully",
+  });
 });
 
+// Reject Product
 exports.rejectedProducts = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const product = await Product.findByIdAndUpdate(
@@ -42,9 +51,13 @@ exports.rejectedProducts = catchAsync(async (req, res, next) => {
       runValidators: true,
     }
   );
-  if (!product) return res.status(404).json({ message: "Product not found" });
+  
+  if (!product) {
+    return next(new AppError("Product not found", 404)); 
+  }
 
-  res
-    .status(200)
-    .json({ status: "success", message: "product rejected successfully" });
+  res.status(200).json({
+    status: "success",
+    message: "Product rejected successfully",
+  });
 });

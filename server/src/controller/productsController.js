@@ -1,66 +1,73 @@
 const Product = require("../models/productsModels");
-const { find } = require("../models/usersModels");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
+// CREATE PRODUCT
 exports.createProduct = catchAsync(async (req, res, next) => {
   const { title, price } = req.body;
-  if (!title || !price) return new AppError("title or price required", 400);
+
+  if (!title || !price)
+    return next(new AppError("Title and price are required", 400));
 
   const newProduct = await Product.create({
     title,
     price,
-    vendor: req.user._id,
+    vendor: req.user._id,  // Ensure the logged-in user is set as the vendor
   });
+
   res.status(201).json({
     status: "success",
-    message: "new product has been created successfully.",
-    products: newProduct,
+    message: "New product has been created successfully.",
+    product: newProduct,
   });
 });
 
+// GET MY ALL PRODUCTS (for a specific vendor)
 exports.getMyAllProducts = catchAsync(async (req, res, next) => {
-  const products = await Product.find({ vendorID: req.user._id });
+  const products = await Product.find({ vendor: req.user._id });  // Fixed field name to 'vendor'
+
   if (!products || products.length === 0)
-    return new AppError("products not found for this vendor", 404);
+    return next(new AppError("No products found for this vendor", 404));
 
   res.status(200).json({
     status: "success",
-    message: "all products fetched successfully",
-    data: {
-      products,
-    },
+    message: "All products fetched successfully",
+    data: { products },
   });
 });
 
+// GET MY PRODUCT (for a specific product)
 exports.getMyProduct = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const product = await Product.findById(id);
-  if (!product) return new AppError("products not found with this id", 404);
+  if (!product) return next(new AppError("Product not found with this ID", 404));
 
   res.status(200).json({
     status: "success",
-    message: "successfully fecth product",
-    data: {
-      product,
-    },
+    message: "Product fetched successfully",
+    data: { product },
   });
 });
-exports.DeleteMyProduct = catchAsync(async (req, res, next) => {
+
+// DELETE MY PRODUCT (for a specific product)
+exports.deleteMyProduct = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const product = await Product.findByIdAndDelete(id);
-  if (!product) return new AppError("products not found with this id", 404);
+  if (!product) return next(new AppError("Product not found with this ID", 404));
 
   res.status(200).json({
     status: "success",
-    message: "product deleted successfully",
+    message: "Product deleted successfully",
   });
 });
-exports.UpdateMyProduct = catchAsync(async (req, res, next) => {
+
+// UPDATE MY PRODUCT (for a specific product)
+exports.updateMyProduct = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
+  // Filter the request body to only allow specific fields for updating
   const filteredBody = {};
   const allowedUpdates = ["title", "price"];
 
@@ -72,24 +79,26 @@ exports.UpdateMyProduct = catchAsync(async (req, res, next) => {
     new: true,
     runValidators: true,
   });
-  if (!product) return new AppError("products not found with this id", 404);
+  
+  if (!product) return next(new AppError("Product not found with this ID", 404));
 
   res.status(200).json({
     status: "success",
-    message: " product updated sucessfully",
+    message: "Product updated successfully",
+    data: { product }, // Send the updated product as response
   });
 });
 
-// for customers
+// GET APPROVED PRODUCTS (for customers to view approved products)
 exports.getApprovedProducts = catchAsync(async (req, res, next) => {
   const products = await Product.find({ status: "approved" });
-  if (!products) return new AppError("no products found", 404);
+
+  if (!products || products.length === 0)
+    return next(new AppError("No approved products found", 404));
+
   res.status(200).json({
     status: "success",
-    message: "products fetched successfully",
-    data: {
-      products,
-    },
+    message: "Approved products fetched successfully",
+    data: { products },
   });
 });
-

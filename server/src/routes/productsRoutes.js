@@ -4,7 +4,6 @@ const router = express.Router();
 const productsController = require("../controller/productsController");
 const authMiddleware = require("../middleware/authMiddleware");
 
-
 // middleware
 router.use(authMiddleware.protect, authMiddleware.restrictTo("vendor"));
 
@@ -14,7 +13,7 @@ router.get("/myProducts", productsController.getMyAllProducts);
 router
   .route("/:id")
   .get(productsController.getMyProduct)
-  .patch(productsController.UpdateMyProduct)
-  .delete(productsController.DeleteMyProduct);
+  .patch(productsController.updateMyProduct)
+  .delete(productsController.deleteMyProduct);
 
 module.exports = router;

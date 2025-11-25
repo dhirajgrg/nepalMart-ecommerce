@@ -9,6 +9,7 @@ const usersRoutes = require("./routes/usersRoutes");
 const authRoutes = require("./routes/authRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const productsRoutes = require("./routes/productsRoutes");
+const cartsRoutes = require("./routes/cartRoutes");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controller/errorController");
 
@@ -23,6 +24,7 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/users", usersRoutes);
 app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/products", productsRoutes);
+app.use("/api/v1/cart", cartsRoutes);
 
 // undefined routes error
 app.all(/.*/, (req, res, next) => {
