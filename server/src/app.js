@@ -13,7 +13,13 @@ const cartsRoutes = require("./routes/cartRoutes");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controller/errorController");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  })
+);
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
@@ -22,7 +28,7 @@ app.use(cookieParser());
 app.use("/api/v1/auths", authRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/users", usersRoutes);
-app.use("/api/v1/customer", customerRoutes);
+app.use("/api/v1/customer", customerRoutes);  
 app.use("/api/v1/products", productsRoutes);
 app.use("/api/v1/cart", cartsRoutes);
 
