@@ -1,7 +1,7 @@
 const User = require("../models/usersModels");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const { jwtTokenGenerator } = require("../utils/jwtHelper"); 
+const { jwtTokenGenerator } = require("../utils/jwtHelper");
 
 // User Controller
 
@@ -89,7 +89,8 @@ exports.getMe = catchAsync(async (req, res, next) => {
   });
 });
 
-// Admin Controller
+//--------------------------------------------------------
+// Admin Controller-----------------------------------------------
 
 // Get All Users (admin only)
 exports.getAllUsers = catchAsync(async (req, res, next) => {

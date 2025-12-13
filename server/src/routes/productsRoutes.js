@@ -3,8 +3,13 @@ const router = express.Router();
 
 const productsController = require("../controller/productsController");
 const authMiddleware = require("../middleware/authMiddleware");
+const productsController = require("../controller/productsController");
 
-// middleware
+
+//public products--------------------------
+router.get("/products", productsController.getApprovedProducts);
+
+// routes for VENDOR---------------------
 router.use(authMiddleware.protect, authMiddleware.restrictTo("vendor"));
 
 router.post("/createProduct", productsController.createProduct);

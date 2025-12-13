@@ -89,6 +89,8 @@ exports.updateMyProduct = catchAsync(async (req, res, next) => {
   });
 });
 
+
+//public products for view
 // GET APPROVED PRODUCTS (for customers to view approved products)
 exports.getApprovedProducts = catchAsync(async (req, res, next) => {
   const products = await Product.find({ status: "approved" });
@@ -99,6 +101,18 @@ exports.getApprovedProducts = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     message: "Approved products fetched successfully",
+    data: { products },
+  });
+});
+exports.getRejectedProducts = catchAsync(async (req, res, next) => {
+  const products = await Product.find({ status: "rejected" });
+
+  if (!products || products.length === 0)
+    return next(new AppError("No approved products found", 404));
+
+  res.status(200).json({
+    status: "success",
+    message: "Rejected products fetched successfully",
     data: { products },
   });
 });
