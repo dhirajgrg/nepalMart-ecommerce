@@ -1,42 +1,33 @@
 const crypto = require("crypto");
 const User = require("../models/usersModels");
 const catchAsync = require("../utils/catchAsync");
-const { jwtTokenGenerator } = require("../utils/jwtHelper");
 const AppError = require("../utils/appError");
 const sendEmail = require("../services/email");
+const { jwtTokenGenerator } = require("../utils/jwtHelper");
+
 
 // SIGNUP
-exports.signup = catchAsync(async (req, res, next) => {
-  const { name, email, password, confirmPassword, role } = req.body;
+exports.signup = async (req, res) => {
+  const user = await User.create(req.body);
 
-  // Create a new user
-  const newUser = await User.create({
-    name,
-    email,
-    password,
-    confirmPassword,
-    role,
-  });
+  if (user.role === "vendor") {
+    await Vendor.create({
+      user: user._id,
+      shopName: req.body.shopName,
+    });
+  }
 
-  // Generate JWT Token
-  const token = await jwtTokenGenerator(newUser._id);
-
-  newUser.password = undefined; // Don't send the password back
-
-  res.cookie("token", token, {
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
+  if (user.role === "customer") {
+    await Customer.create({
+      user: user._id,
+    });
+  }
 
   res.status(201).json({
     status: "success",
-    message: "User signed up successfully",
-    token,
-    data: {
-      user: newUser,
-    },
+    data: { user },
   });
-});
+};
 
 // LOGIN
 exports.signin = catchAsync(async (req, res, next) => {
@@ -125,7 +116,10 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     return next(
-      new AppError("There was an error sending the email. Please try again later.", 500)
+      new AppError(
+        "There was an error sending the email. Please try again later.",
+        500
+      )
     );
   }
 });
@@ -143,7 +137,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     passwordResetToken: hashedToken,
     passwordResetTokenExpires: { $gt: Date.now() },
   });
-  if (!user) return next(new AppError("Invalid token or token has expired", 400));
+  if (!user)
+    return next(new AppError("Invalid token or token has expired", 400));
 
   // Update the user's password
   user.password = req.body.password;

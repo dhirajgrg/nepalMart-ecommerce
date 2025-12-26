@@ -1,9 +1,9 @@
 const User = require("../models/usersModels");
-const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const catchAsync = require("../utils/catchAsync");
 const { jwtTokenGenerator } = require("../utils/jwtHelper");
 
-// User Controller
+// ++++++++++++++++++++++USER ONLY+++++++++++++++++++++++
 
 // Update My Password
 exports.updateMyPassword = catchAsync(async (req, res, next) => {
@@ -89,8 +89,9 @@ exports.getMe = catchAsync(async (req, res, next) => {
   });
 });
 
-//--------------------------------------------------------
-// Admin Controller-----------------------------------------------
+
+
+//++++++++++++++++++++++ADMIN ONLY+++++++++++++++++++++++++++++++++
 
 // Get All Users (admin only)
 exports.getAllUsers = catchAsync(async (req, res, next) => {
