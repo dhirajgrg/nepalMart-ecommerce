@@ -5,29 +5,26 @@ const AppError = require("../utils/appError");
 const sendEmail = require("../services/email");
 const { jwtTokenGenerator } = require("../utils/jwtHelper");
 
-
 // SIGNUP
-exports.signup = async (req, res) => {
-  const user = await User.create(req.body);
-
-  if (user.role === "vendor") {
-    await Vendor.create({
-      user: user._id,
-      shopName: req.body.shopName,
-    });
+exports.signup = catchAsync(async (req, res, next) => {
+  const { name, email, password, confirmPassword, role } = req.body;
+  if (!name || !email || !password || !confirmPassword) {
+    return next(new AppError("All fields are required", 400));
   }
 
-  if (user.role === "customer") {
-    await Customer.create({
-      user: user._id,
-    });
-  }
+  const user = await User.create({
+    name,
+    email,
+    password,
+    confirmPassword,
+    role,
+  });
 
   res.status(201).json({
     status: "success",
     data: { user },
   });
-};
+});
 
 // LOGIN
 exports.signin = catchAsync(async (req, res, next) => {

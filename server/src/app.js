@@ -3,10 +3,14 @@ const app = express();
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-
-const authRoutes = require("./routes/authRoutes");
 const AppError = require("./utils/appError");
+
 const globalErrorHandler = require("./controller/errorController");
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
+const healthRoutes = require("./routes/healthRoutes");
+const storeRoutes = require("./routes/storeRoutes");
+const productRoutes = require("./routes/productRoutes");
 
 app.use(
   cors({
@@ -21,6 +25,13 @@ app.use(cookieParser());
 
 // main routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/health", healthRoutes);
+app.use("/api/v1/stores", storeRoutes);
+app.use("/api/v1/products", productRoutes);
+
+
+
 
 // undefined routes error
 app.all(/.*/, (req, res, next) => {

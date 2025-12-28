@@ -5,6 +5,19 @@ const { jwtTokenGenerator } = require("../utils/jwtHelper");
 
 // ++++++++++++++++++++++USER ONLY+++++++++++++++++++++++
 
+// Get Me (fetch the logged-in user)
+exports.getMe = catchAsync(async (req, res, next) => {
+  const user = req.user;
+
+  if (!user) {
+    return next(new AppError("User not found or not logged in", 401));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: { user },
+  });
+});
 // Update My Password
 exports.updateMyPassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select("+password");
@@ -75,19 +88,6 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-// Get Me (fetch the logged-in user)
-exports.getMe = catchAsync(async (req, res, next) => {
-  const user = req.user;
-
-  if (!user) {
-    return next(new AppError("User not found or not logged in", 401));
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: { user },
-  });
-});
 
 
 
