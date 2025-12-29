@@ -11,6 +11,8 @@ const userRoutes = require("./routes/userRoutes");
 const healthRoutes = require("./routes/healthRoutes");
 const storeRoutes = require("./routes/storeRoutes");
 const productRoutes = require("./routes/productRoutes");
+const cartRoutes = require("./routes/cartRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 app.use(
   cors({
@@ -29,6 +31,8 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/stores", storeRoutes);
 app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/cart", cartRoutes);
+app.use("/api/v1/orders", orderRoutes);
 
 
 
