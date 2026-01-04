@@ -26,8 +26,28 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["PENDING", "ACCEPTED", "REJECTED"],
-      default: "PENDING",
+      enum: [
+        "CREATED", // customer placed order
+        "ACCEPTED", // vendor accepted
+        "REJECTED", // vendor rejected
+        "PREPARING", // cooking
+        "READY", // ready for pickup
+        "PICKED", // rider picked
+        "DELIVERED", // customer received
+        "CANCELLED", // admin/system
+      ],
+      default: "CREATED",
+    },
+
+    cancelledBy: {
+      type: String,
+      enum: ["CUSTOMER", "VENDOR", "ADMIN", "SYSTEM"],
+      default: null,
+    },
+
+    cancelledAt: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }

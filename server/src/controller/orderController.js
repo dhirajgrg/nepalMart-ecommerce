@@ -2,8 +2,7 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Cart = require("../models/cartModels");
 const Store = require("../models/storeModels");
-const Order=require("../models/orderModels")
-
+const Order = require("../models/orderModels");
 
 exports.createOrder = catchAsync(async (req, res, next) => {
   const cart = await Cart.findOne({ customer: req.user._id });
@@ -52,6 +51,125 @@ exports.getOrdersForStore = catchAsync(async (req, res, next) => {
     message: "Orders retrieved successfully",
     data: {
       orders,
+    },
+  });
+});
+
+exports.getOrderforVendor = catchAsync(async (req, res, next) => {
+  console.log("AUTH:", req.user);
+
+  const order = await Order.find({
+    store: req.user.store,
+    status: { $in: ["CREATED", "ACCEPTED", "PREPARING", "READY"] },
+  }).sort({ createdAt: -1 });
+  console.log(order);
+  if (!order || order.length === 0) {
+    return next(new AppError("Order not found", 404));
+  }
+  res.status(200).json({
+    status: "sucess",
+    message: "orders fetched successfully",
+    data: {
+      order,
+    },
+  });
+});
+
+exports.acceptOrderByVendor = catchAsync(async (req, res, next) => {
+  const { orderId } = req.params;
+  const order = await Order.findOne({ _id: orderId, store: req.user.store });
+
+  if (!order) {
+    return next(new AppError("Order not found", 404));
+  }
+  if (order.status !== "CREATED") {
+    return next(
+      new AppError("Only orders with status CREATED can be accepted", 400)
+    );
+  }
+
+  order.status = "ACCEPTED";
+  await order.save();
+  res.status(200).json({
+    status: "success",
+    message: "Order accepted successfully",
+    data: {
+      order,
+    },
+  });
+});
+
+exports.rejectOrderByVendor = catchAsync(async (req, res, next) => {
+  const { orderId } = req.params;
+  const order = await Order.findOne({ _id: orderId, store: req.user.store });
+
+  if (!order) {
+    return next(new AppError("Order not found", 404));
+  }
+  if (order.status !== "CREATED") {
+    return next(
+      new AppError(" orders cannot be rejected", 400)
+    );
+  }
+
+  order.status = "REJECTED";
+  order.cancelledBy = "VENDOR";
+  await order.save();
+  res.status(200).json({
+    status: "success",
+    message: "Order rejected successfully",
+    data: {
+      order,
+    },
+  });
+});
+
+exports.preparingOrderByVendor = catchAsync(async (req, res, next) => {
+  const { orderId } = req.params;
+  const order = await Order.findOne({ _id: orderId, store: req.user.store });
+
+  if (!order) {
+    return next(new AppError("Order not found", 404));
+  }
+  if (order.status !== "ACCEPTED") {
+    return next(
+      new AppError("Only orders with status ACCEPTED can be prepared", 400)
+    );
+  }
+
+  order.status = "PREPARING";
+  await order.save();
+  res.status(200).json({
+    status: "success",
+    message: "Order rejected successfully",
+    data: {
+      order,
+    },
+  });
+});
+exports.readyForPickup = catchAsync(async (req, res, next) => {
+  const { orderId } = req.params;
+  const order = await Order.findOne({ _id: orderId, store: req.user.store });
+
+  if (!order) {
+    return next(new AppError("Order not found", 404));
+  }
+  if (order.status !== "PREPARING") {
+    return next(
+      new AppError(
+        "Only orders with status PREPARING can be ready for pickup",
+        400
+      )
+    );
+  }
+
+  order.status = "READY";
+  await order.save();
+  res.status(200).json({
+    status: "success",
+    message: "Order rejected successfully",
+    data: {
+      order,
     },
   });
 });

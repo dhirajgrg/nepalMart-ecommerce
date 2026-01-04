@@ -1,6 +1,7 @@
 const Store = require("../models/storeModels");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const User = require("../models/usersModels");
 
 exports.createStore = catchAsync(async (req, res, next) => {
   const { name, description } = req.body;
@@ -13,6 +14,12 @@ exports.createStore = catchAsync(async (req, res, next) => {
     name,
     description,
   });
+
+
+  // link back store to user
+  req.user.store = newStore._id;
+ await User.findByIdAndUpdate(req.user._id, { store: newStore._id });
+
 
   res.status(201).json({
     status: "success",

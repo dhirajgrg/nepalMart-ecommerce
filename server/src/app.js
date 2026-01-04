@@ -13,6 +13,7 @@ const storeRoutes = require("./routes/storeRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const vendorRoutes=require("./routes/vendorRoutes")
 
 app.use(
   cors({
@@ -33,6 +34,7 @@ app.use("/api/v1/stores", storeRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/vendor", vendorRoutes);
 
 
 

@@ -39,10 +39,15 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "vendor", "customer", "rider"],
       default: "customer",
     },
+    store: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Store",
+      default: null,
+    },
     changedPasswordAt: Date,
     passwordResetToken: String,
     passwordResetTokenExpires: Date,
-    
+
     isActive: {
       type: Boolean,
       default: true,
