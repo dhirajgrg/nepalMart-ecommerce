@@ -12,6 +12,11 @@ const orderSchema = new mongoose.Schema(
       ref: "Store",
       required: true,
     },
+    rider: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Rider",
+      default: null,
+    },
 
     items: [
       {

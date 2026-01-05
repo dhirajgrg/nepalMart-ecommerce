@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const User = require("../models/usersModels");
+const Rider = require("../models/riderModels");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const sendEmail = require("../services/email");
@@ -19,6 +20,11 @@ exports.signup = catchAsync(async (req, res, next) => {
     confirmPassword,
     role,
   });
+
+  if (user.role === "rider") {
+    await Rider.create({ user: user._id });
+    
+  }
 
   res.status(201).json({
     status: "success",

@@ -3,6 +3,7 @@ const AppError = require("../utils/appError");
 const Cart = require("../models/cartModels");
 const Store = require("../models/storeModels");
 const Order = require("../models/orderModels");
+const Rider = require("../models/riderModels");
 
 exports.createOrder = catchAsync(async (req, res, next) => {
   const cart = await Cart.findOne({ customer: req.user._id });
@@ -107,9 +108,7 @@ exports.rejectOrderByVendor = catchAsync(async (req, res, next) => {
     return next(new AppError("Order not found", 404));
   }
   if (order.status !== "CREATED") {
-    return next(
-      new AppError(" orders cannot be rejected", 400)
-    );
+    return next(new AppError(" orders cannot be rejected", 400));
   }
 
   order.status = "REJECTED";
@@ -147,6 +146,7 @@ exports.preparingOrderByVendor = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 exports.readyForPickup = catchAsync(async (req, res, next) => {
   const { orderId } = req.params;
   const order = await Order.findOne({ _id: orderId, store: req.user.store });
@@ -163,8 +163,19 @@ exports.readyForPickup = catchAsync(async (req, res, next) => {
     );
   }
 
+  //order assign to rider logic
+  const rider = await Rider.findOne({ isOnline: true, isAvailable: true });
+  if (!rider) {
+    return next(new AppError("No available riders at the moment", 400));
+  }
+  
   order.status = "READY";
-  await order.save();
+  order.rider = rider._id;
+  rider.currentOrder = order._id;
+  rider.isAvailable = false;
+
+  await Promise.all([order.save(), rider.save()]);
+
   res.status(200).json({
     status: "success",
     message: "Order rejected successfully",
