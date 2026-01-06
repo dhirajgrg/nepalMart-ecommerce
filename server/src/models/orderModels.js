@@ -29,6 +29,7 @@ const orderSchema = new mongoose.Schema(
 
     subtotal: Number,
 
+    
     status: {
       type: String,
       enum: [
@@ -43,16 +44,24 @@ const orderSchema = new mongoose.Schema(
       ],
       default: "CREATED",
     },
-
+    
     cancelledBy: {
       type: String,
       enum: ["CUSTOMER", "VENDOR", "ADMIN", "SYSTEM"],
       default: null,
     },
-
+    
     cancelledAt: {
       type: Date,
       default: null,
+    },
+    pricing: {
+      itemsTotal: Number, // sum of (price × quantity)
+      deliveryFee: Number, // charged to customer
+      vendorCommission: Number, // platform cut
+      riderEarning: Number, // rider payout
+      vendorEarning: Number, // vendor net
+      platformEarning: Number, // your profit
     },
   },
   { timestamps: true }

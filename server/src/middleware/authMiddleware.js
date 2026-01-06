@@ -3,6 +3,8 @@ const User = require("../models/usersModels");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
+
+// authentication middleware
 exports.protect = catchAsync(async (req, res, next) => {
   // Step 1: Extract token from cookies
   const token = req.cookies.token;
@@ -37,3 +39,14 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 
+// role middleware
+exports.restrictTo = (...roles) => {
+  // Admin, Vendor, Customer roles, etc.
+  return (req, res, next) => {
+    // Check if the user role is allowed to access this route
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError("Access denied! ", 403));
+    }
+    next();
+  };
+};

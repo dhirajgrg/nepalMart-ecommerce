@@ -140,7 +140,7 @@ exports.preparingOrderByVendor = catchAsync(async (req, res, next) => {
   await order.save();
   res.status(200).json({
     status: "success",
-    message: "Order rejected successfully",
+    message: "Order prepared successfully",
     data: {
       order,
     },
@@ -178,7 +178,7 @@ exports.readyForPickup = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    message: "Order rejected successfully",
+    message: "Order ready for pickup successfully",
     data: {
       order,
     },

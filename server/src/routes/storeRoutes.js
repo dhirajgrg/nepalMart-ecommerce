@@ -2,26 +2,25 @@ const express = require("express");
 const router = express.Router();
 const storeController = require("../controller/storeController");
 const authMiddleware = require("../middleware/authMiddleware");
-const roleMiddleware = require("../middleware/roleMiddleware");
 
 // ++++++++++++++++ ONLY FOR VENDOR ROUTES +++++++++++++++++++
 router.post(
   "/",
   authMiddleware.protect,
-  roleMiddleware.restrictTo("vendor"),
+  authMiddleware.restrictTo("vendor"),
   storeController.createStore
 );
 
 router.get(
   "/myStore",
   authMiddleware.protect,
-  roleMiddleware.restrictTo("vendor"),
+  authMiddleware.restrictTo("vendor"),
   storeController.myStore
 );
 router.patch(
   "/open",
   authMiddleware.protect,
-  roleMiddleware.restrictTo("vendor"),
+  authMiddleware.restrictTo("vendor"),
   storeController.openStore
 );
 
@@ -32,7 +31,7 @@ router.get("/", authMiddleware.protect, storeController.storesList);
 router.patch(
   "/:storeId/commission",
   authMiddleware.protect,
-  roleMiddleware.restrictTo("admin"),
+  authMiddleware.restrictTo("admin"),
   storeController.commissionRate
 );
 

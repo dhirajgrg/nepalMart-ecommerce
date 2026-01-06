@@ -13,8 +13,9 @@ const storeRoutes = require("./routes/storeRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
-const vendorRoutes=require("./routes/vendorRoutes")
-const riderRoutes=require("./routes/riderRoutes")
+const vendorRoutes = require("./routes/vendorRoutes");
+const riderRoutes = require("./routes/riderRoutes");
+const earningsRoutes = require("./routes/earningsRoutes");
 
 app.use(
   cors({
@@ -37,9 +38,7 @@ app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/vendor", vendorRoutes);
 app.use("/api/v1/rider", riderRoutes);
-
-
-
+app.use("/api/v1/earnings", earningsRoutes);
 
 // undefined routes error
 app.all(/.*/, (req, res, next) => {

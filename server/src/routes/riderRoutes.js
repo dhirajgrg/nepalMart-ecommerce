@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const riderController = require("../controller/riderController");
+const riderController = require("../controller/ridercontroller");
 const authMiddleware = require("../middleware/authMiddleware");
-const roleMiddleware = require("../middleware/roleMiddleware");
 
 
 // middleware
-router.use(authMiddleware.protect, roleMiddleware.restrictTo("rider"));
+router.use(authMiddleware.protect, authMiddleware.restrictTo("rider"));
 
 
 // routes

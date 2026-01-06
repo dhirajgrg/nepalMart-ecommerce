@@ -2,13 +2,12 @@ const express = require("express");
 const router = express.Router();
 const orderController = require("../controller/orderController");
 const authMiddleware = require("../middleware/authMiddleware");
-const roleMiddleware = require("../middleware/roleMiddleware");
 
 // ++++++++++++++++++ customer route +++++++++++++++++++++
 router.post(
   "/createOrder",
   authMiddleware.protect,
-  roleMiddleware.restrictTo("customer"),
+  authMiddleware.restrictTo("customer"),
   orderController.createOrder
 );
 
@@ -16,7 +15,7 @@ router.post(
 router.get(
   "/getOrder",
   authMiddleware.protect,
-  roleMiddleware.restrictTo("vendor"),
+  authMiddleware.restrictTo("vendor"),
   orderController.getOrdersForStore
 );
 module.exports = router;
