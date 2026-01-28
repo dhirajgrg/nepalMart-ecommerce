@@ -4,6 +4,7 @@ const Cart = require("../models/cartModels");
 const Store = require("../models/storeModels");
 const Order = require("../models/orderModels");
 const Rider = require("../models/riderModels");
+const { getIO } = require("../utils/socket");
 
 exports.createOrder = catchAsync(async (req, res, next) => {
   const cart = await Cart.findOne({ customer: req.user._id });
@@ -19,7 +20,7 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   let subtotal = 0;
   subtotal = cart.items.reduce(
     (acc, item) => acc + item.price * item.quantity,
-    0
+    0,
   );
 
   const order = await Order.create({
@@ -32,6 +33,25 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   // clear the cart after creating order
   cart.items = [];
   await cart.save();
+  try {
+    const io = getIO();
+    io.to(order._id.toString()).emit("orderUpdated", {
+      orderId: order._id,
+      status: order.status,
+      order,
+    });
+    io.to(`user_${order.customer.toString()}`).emit("orderCreated", {
+      orderId: order._id,
+      order,
+    });
+    io.to(`store_${order.store.toString()}`).emit("newOrder", {
+      orderId: order._id,
+      order,
+    });
+  } catch (err) {
+    // socket not initialized or emit failed — don't block the response
+    console.error("Socket emit error on createOrder:", err.message);
+  }
   res.status(201).json({
     status: "success",
     message: "Order created successfully",
@@ -85,12 +105,26 @@ exports.acceptOrderByVendor = catchAsync(async (req, res, next) => {
   }
   if (order.status !== "CREATED") {
     return next(
-      new AppError("Only orders with status CREATED can be accepted", 400)
+      new AppError("Only orders with status CREATED can be accepted", 400),
     );
   }
 
   order.status = "ACCEPTED";
   await order.save();
+  try {
+    const io = getIO();
+    io.to(order._id.toString()).emit("orderUpdated", {
+      orderId: order._id,
+      status: order.status,
+      order,
+    });
+    io.to(`user_${order.customer.toString()}`).emit("orderAccepted", {
+      orderId: order._id,
+      order,
+    });
+  } catch (err) {
+    console.error("Socket emit error on acceptOrderByVendor:", err.message);
+  }
   res.status(200).json({
     status: "success",
     message: "Order accepted successfully",
@@ -114,6 +148,20 @@ exports.rejectOrderByVendor = catchAsync(async (req, res, next) => {
   order.status = "REJECTED";
   order.cancelledBy = "VENDOR";
   await order.save();
+  try {
+    const io = getIO();
+    io.to(order._id.toString()).emit("orderUpdated", {
+      orderId: order._id,
+      status: order.status,
+      order,
+    });
+    io.to(`user_${order.customer.toString()}`).emit("orderRejected", {
+      orderId: order._id,
+      order,
+    });
+  } catch (err) {
+    console.error("Socket emit error on rejectOrderByVendor:", err.message);
+  }
   res.status(200).json({
     status: "success",
     message: "Order rejected successfully",
@@ -132,12 +180,26 @@ exports.preparingOrderByVendor = catchAsync(async (req, res, next) => {
   }
   if (order.status !== "ACCEPTED") {
     return next(
-      new AppError("Only orders with status ACCEPTED can be prepared", 400)
+      new AppError("Only orders with status ACCEPTED can be prepared", 400),
     );
   }
 
   order.status = "PREPARING";
   await order.save();
+  try {
+    const io = getIO();
+    io.to(order._id.toString()).emit("orderUpdated", {
+      orderId: order._id,
+      status: order.status,
+      order,
+    });
+    io.to(`user_${order.customer.toString()}`).emit("orderPreparing", {
+      orderId: order._id,
+      order,
+    });
+  } catch (err) {
+    console.error("Socket emit error on preparingOrderByVendor:", err.message);
+  }
   res.status(200).json({
     status: "success",
     message: "Order prepared successfully",
@@ -158,8 +220,8 @@ exports.readyForPickup = catchAsync(async (req, res, next) => {
     return next(
       new AppError(
         "Only orders with status PREPARING can be ready for pickup",
-        400
-      )
+        400,
+      ),
     );
   }
 
@@ -168,13 +230,32 @@ exports.readyForPickup = catchAsync(async (req, res, next) => {
   if (!rider) {
     return next(new AppError("No available riders at the moment", 400));
   }
-  
+
   order.status = "READY";
   order.rider = rider._id;
   rider.currentOrder = order._id;
   rider.isAvailable = false;
 
   await Promise.all([order.save(), rider.save()]);
+
+  try {
+    const io = getIO();
+    io.to(order._id.toString()).emit("orderUpdated", {
+      orderId: order._id,
+      status: order.status,
+      order,
+    });
+    io.to(`user_${order.customer.toString()}`).emit("orderReady", {
+      orderId: order._id,
+      order,
+    });
+    io.to(`rider_${rider._id.toString()}`).emit("assignedOrder", {
+      orderId: order._id,
+      order,
+    });
+  } catch (err) {
+    console.error("Socket emit error on readyForPickup:", err.message);
+  }
 
   res.status(200).json({
     status: "success",

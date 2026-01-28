@@ -13,10 +13,9 @@ exports.createCart = catchAsync(async (req, res, next) => {
     );
   }
 
-  const cart = await Cart.findOne({ customer: req.user._id });
+  let cart = await Cart.findOne({ customer: req.user._id });
   if (!cart) {
-    
-    await Cart.create({
+    cart = await Cart.create({
       customer: req.user._id,
       store: product.store._id,
       items: [],
